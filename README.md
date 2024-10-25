@@ -276,80 +276,106 @@
         const drinkRecipes = {
             "Margarita": ["Tequila", "Triple Sec", "Lime Juice", "Tall Glass"],
             "Old Fashioned": ["Whiskey", "Bitters", "Sugar", "Short Glass"],
-            "Mojito": ["White Rum", "Sugar", "Mint", "Soda Water", "Tall Glass"],
-            "Cosmopolitan": ["Vodka", "Triple Sec", "Cranberry Juice", "Lime Juice", "Martini Glass"],
-            "Whiskey Sour": ["Whiskey", "Lemon Juice", "Sugar", "Short Glass"],
+            "Mojito": ["White Rum", "Lime Juice", "Mint", "Soda Water", "Tall Glass"],
+            "Bloody Mary": ["Vodka", "Tomato Juice", "Lemon Juice", "Celery", "Tall Glass"],
             "Martini": ["Gin", "Vermouth", "Olive", "Martini Glass"],
-            "Daiquiri": ["White Rum", "Lime Juice", "Sugar", "Short Glass"],
-            "Pina Colada": ["White Rum", "Coconut Cream", "Pineapple Juice", "Tall Glass"],
+            "Pina Colada": ["White Rum", "Pineapple Juice", "Coconut Cream", "Tall Glass"],
+            "Cosmopolitan": ["Vodka", "Triple Sec", "Cranberry Juice", "Lime Juice", "Martini Glass"],
+            "Whiskey Sour": ["Whiskey", "Lemon Juice", "Sugar", "Egg White", "Short Glass"],
+            "Long Island Iced Tea": ["Vodka", "Tequila", "White Rum", "Gin", "Triple Sec", "Cola", "Tall Glass"],
             "Gin Tonic": ["Gin", "Tonic Water", "Lime Juice", "Tall Glass"],
-            "Bloody Mary": ["Vodka", "Tomato Juice", "Lemon Juice", "Tall Glass"],
-            "Mai Tai": ["White Rum", "Dark Rum", "Lime Juice", "Triple Sec", "Tall Glass"],
+            "Daiquiri": ["White Rum", "Lime Juice", "Simple Syrup", "Short Glass"],
+            "Mai Tai": ["Dark Rum", "White Rum", "Lime Juice", "Triple Sec", "Grenadine", "Tall Glass"],
             "Negroni": ["Gin", "Campari", "Vermouth", "Short Glass"],
             "Moscow Mule": ["Vodka", "Lime Juice", "Ginger Beer", "Mug"],
-            "Bellini": ["Prosecco", "Peach Puree", "Champagne Flute"],
-            "Irish Coffee": ["Coffee", "Irish Whiskey", "Sugar", "Cream", "Mug"],
-            "Long Island Iced Tea": ["Vodka", "Tequila", "White Rum", "Triple Sec", "Gin", "Cola", "Tall Glass"],
-            "Caipirinha": ["Cachaça", "Sugar", "Lime Juice", "Short Glass"],
             "Screwdriver": ["Vodka", "Orange Juice", "Tall Glass"],
-            "Aperol Spritz": ["Aperol", "Prosecco", "Club Soda", "Tall Glass"],
-            "Whiskey Smash": ["Whiskey", "Lemon Juice", "Mint", "Short Glass"]
+            "Irish Coffee": ["Irish Whiskey", "Coffee", "Cream", "Mug"],
+            "Aperol Spritz": ["Aperol", "Prosecco", "Soda Water", "Champagne Flute"],
+            "Tequila Sunrise": ["Tequila", "Orange Juice", "Grenadine", "Tall Glass"],
+            "Rum Punch": ["Dark Rum", "Pineapple Juice", "Orange Juice", "Grenadine", "Tall Glass"]
         };
 
         function takeOrder() {
-            if (currentOrder) {
-                pendingOrders.push(currentOrder);
-                updatePendingOrders();
-            }
-            let drinks = Object.keys(drinkRecipes);
-            currentOrder = drinks[Math.floor(Math.random() * drinks.length)];
-            currentOrderIngredients = drinkRecipes[currentOrder];
-            document.getElementById("currentOrder").innerText = `New Order: ${currentOrder} - Ingredients: ${currentOrderIngredients.join(", ")}`;
+            const drinks = Object.keys(drinkRecipes);
+            const randomDrink = drinks[Math.floor(Math.random() * drinks.length)];
+            currentOrder = randomDrink;
+            currentOrderIngredients = drinkRecipes[randomDrink];
+            pendingOrders.push(currentOrder);
+            updatePendingOrders();
+            displayCurrentOrder();
             startOrderTimer();
         }
 
-        function makeDrink() {
-            if (currentOrder) {
-                if (arraysEqual(selectedIngredients, currentOrderIngredients)) {
-                    tips += incomePerDrink;
-                    drinksMade++;
-                    money += incomePerDrink;
-                    showMessage(`Perfect! You made a ${currentOrder} and earned $${incomePerDrink}`);
-                } else {
-                    showMessage(`Oops! The ${currentOrder} wasn't quite right. You earned less tips.`);
-                    tips += incomePerDrink / 2;
-                    money += incomePerDrink / 2;
-                }
-                selectedIngredients = [];
-                currentOrder = "";
-                document.getElementById("currentOrder").innerText = "";
-                updateBusinessStatus();
-                clearOrderTimer();
-            } else {
-                showMessage("No current order to make!");
-            }
-        }
-
-        function selectIngredient(ingredient) {
-            if (!selectedIngredients.includes(ingredient)) {
-                selectedIngredients.push(ingredient);
-                showMessage(`Selected: ${ingredient}`);
-            } else {
-                showMessage(`${ingredient} is already selected!`);
-            }
+        function displayCurrentOrder() {
+            document.getElementById("currentOrder").innerText = `Order: ${currentOrder} - Ingredients: ${currentOrderIngredients.join(", ")}`;
         }
 
         function updatePendingOrders() {
             const pendingOrdersList = document.getElementById("pendingOrders");
             pendingOrdersList.innerHTML = "";
-            pendingOrders.forEach(order => {
+            pendingOrders.forEach((order, index) => {
                 const li = document.createElement("li");
-                li.textContent = order;
+                li.innerText = order;
                 pendingOrdersList.appendChild(li);
             });
         }
 
-        function updateBusinessStatus() {
+        function selectIngredient(ingredient) {
+            if (selectedIngredients.includes(ingredient)) {
+                selectedIngredients = selectedIngredients.filter(item => item !== ingredient);
+                document.querySelector(`[onclick="selectIngredient('${ingredient}')"]`).classList.remove("selected");
+            } else {
+                selectedIngredients.push(ingredient);
+                document.querySelector(`[onclick="selectIngredient('${ingredient}')"]`).classList.add("selected");
+            }
+        }
+
+        function makeDrink() {
+            if (currentOrder === "") {
+                alert("No order taken!");
+                return;
+            }
+
+            if (arraysEqual(selectedIngredients, currentOrderIngredients)) {
+                tips += incomePerDrink;
+                drinksMade++;
+                money += incomePerDrink;
+                pendingOrders.shift();
+                resetOrder();
+                alert("Drink made perfectly! You earned a tip!");
+            } else {
+                tips += incomePerDrink / 2;
+                drinksMade++;
+                pendingOrders.shift();
+                resetOrder();
+                alert("Drink made incorrectly. Partial tip received.");
+            }
+
+            updateGameStatus();
+        }
+
+        function resetOrder() {
+            currentOrder = "";
+            currentOrderIngredients = [];
+            selectedIngredients = [];
+            updatePendingOrders();
+            displayCurrentOrder();
+            clearIngredientSelections();
+            clearOrderTimer();
+        }
+
+        function clearIngredientSelections() {
+            document.querySelectorAll(".ingredient-button").forEach(button => {
+                button.classList.remove("selected");
+            });
+        }
+
+        function arraysEqual(arr1, arr2) {
+            if (arr1.length !== arr2.length) return false;
+            return arr1.sort().every((value, index) => value === arr2.sort()[index]);
+        }
+
+        function updateGameStatus() {
             document.getElementById("tips").innerText = tips;
             document.getElementById("drinksMade").innerText = drinksMade;
             document.getElementById("money").innerText = money;
@@ -357,64 +383,72 @@
         }
 
         function updateBartenderRank() {
-            if (money >= 1000) {
-                bartenderRank = "Mixologist";
-            } else if (money >= 500) {
-                bartenderRank = "Bartender Extraordinaire";
-            } else if (money >= 200) {
+            if (drinksMade >= 50) {
+                bartenderRank = "Celebrity Bartender";
+            } else if (drinksMade >= 30) {
+                bartenderRank = "Master Mixologist";
+            } else if (drinksMade >= 15) {
+                bartenderRank = "Experienced Bartender";
+            } else if (drinksMade >= 5) {
                 bartenderRank = "Junior Bartender";
+            } else {
+                bartenderRank = "Barback Trainee";
             }
             document.getElementById("bartenderRank").innerText = bartenderRank;
         }
 
-        function buyUpgrade(upgrade) {
-            if (upgrade === 'betterShaker' && money >= 200) {
-                money -= 200;
-                incomePerDrink += 5;
-                showMessage("Purchased Better Shaker! Income per drink increased.");
-            } else if (upgrade === 'fancyGlassware' && money >= 500) {
-                money -= 500;
-                incomePerDrink += 10;
-                showMessage("Purchased Fancy Glassware! Income per drink increased.");
-            } else if (upgrade === 'bartenderAssistant' && money >= 1000) {
-                money -= 1000;
-                incomePerDrink += 20;
-                showMessage("Hired Bartender Assistant! Income per drink increased.");
-            } else {
-                showMessage("Not enough money for this upgrade!");
-            }
-            updateBusinessStatus();
-        }
-
-        function showMessage(message) {
-            const currentOrderDisplay = document.getElementById("currentOrder");
-            currentOrderDisplay.innerText = message;
-        }
-
         function startOrderTimer() {
-            clearOrderTimer();
+            if (orderTimer) {
+                clearTimeout(orderTimer);
+            }
             orderTimer = setTimeout(() => {
-                showMessage("Time's up! You missed the order.");
-                currentOrder = "";
-                updatePendingOrders();
-            }, 30000); // 30 seconds to complete the order
+                document.body.classList.add("danger-border");
+                alert("Time's up! You lost the opportunity for a tip!");
+                resetOrder();
+            }, 30000);
         }
 
         function clearOrderTimer() {
             if (orderTimer) {
                 clearTimeout(orderTimer);
+                document.body.classList.remove("danger-border");
                 orderTimer = null;
             }
         }
 
-        function arraysEqual(a, b) {
-            if (a.length !== b.length) return false;
-            a.sort();
-            b.sort();
-            for (let i = 0; i < a.length; i++) {
-                if (a[i] !== b[i]) return false;
+        function buyUpgrade(upgrade) {
+            switch (upgrade) {
+                case 'betterShaker':
+                    if (money >= 200) {
+                        money -= 200;
+                        incomePerDrink += 5;
+                        alert("Upgrade purchased: Better Shaker! Increased tip earnings.");
+                    } else {
+                        alert("Not enough money for this upgrade.");
+                    }
+                    break;
+                case 'fancyGlassware':
+                    if (money >= 500) {
+                        money -= 500;
+                        incomePerDrink += 10;
+                        alert("Upgrade purchased: Fancy Glassware! Customers are tipping more.");
+                    } else {
+                        alert("Not enough money for this upgrade.");
+                    }
+                    break;
+                case 'bartenderAssistant':
+                    if (money >= 1000) {
+                        money -= 1000;
+                        incomePerDrink += 20;
+                        alert("Upgrade purchased: Bartender Assistant! More tips for faster service.");
+                    } else {
+                        alert("Not enough money for this upgrade.");
+                    }
+                    break;
+                default:
+                    alert("Unknown upgrade.");
             }
-            return true;
+            updateGameStatus();
         }
     </script>
 </body>
