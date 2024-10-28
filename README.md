@@ -211,6 +211,12 @@
             border-radius: 10px;
             margin-bottom: 15px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: none; /* Hidden by default */
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            max-width: 250px;
+            z-index: 1000;
         }
 
         .rules h2 {
@@ -259,6 +265,32 @@
             z-index: 1000;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             text-align: center;
+        }
+
+        /* Tip Notification Styles */
+        #tipNotification {
+            position: fixed;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(39, 174, 96, 0.9);
+            color: #fff;
+            padding: 30px 40px;
+            border-radius: 50px;
+            font-size: 2em;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s, top 0.5s;
+            z-index: 1001;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            text-align: center;
+            animation: tipFlash 1s ease-in-out;
+        }
+
+        @keyframes tipFlash {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
         }
 
         /* Animation for Level Up */
@@ -368,6 +400,36 @@
             background-color: #f2f2f2;
         }
 
+        /* Game Over Modal */
+        #gameOverModal .modal-content {
+            max-width: 400px;
+        }
+
+        /* Directions Button */
+        #directionsBtn {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #ffcc00;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.5em;
+            cursor: pointer;
+            box-shadow: 0 3px 7px rgba(0,0,0,0.2);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Next Level Modal */
+        #nextLevelModal .modal-content {
+            max-width: 400px;
+        }
+
         /* Responsive Design */
         @media (max-width: 600px) {
             .status-item {
@@ -396,6 +458,7 @@
 </head>
 <body>
     <h1>Celebrity Bartender</h1>
+    <button id="directionsBtn">?</button>
     <div class="game-container">
         <!-- Status Bar -->
         <div class="status-bar">
@@ -424,7 +487,7 @@
                 <p>Round: <span id="currentRound">1</span></p>
             </div>
             <div class="status-item">
-                <p>Round Timer: <span id="roundTimer">0s</span></p>
+                <p>Level Timer: <span id="roundTimer">0s</span></p>
             </div>
         </div>
 
@@ -444,16 +507,16 @@
         </div>
 
         <!-- Game Rules -->
-        <div class="rules">
+        <div class="rules" id="rules">
             <h2>Game Rules & Directions</h2>
             <p>Welcome to <strong>Celebrity Bartender</strong>! Here's how to play:</p>
             <ul>
                 <li><strong>Start Game:</strong> Click "Start Game" to begin your shift.</li>
-                <li><strong>Rounds:</strong> Complete rounds of 10 drinks as quickly as possible to earn bonuses.</li>
+                <li><strong>Levels:</strong> Complete levels of 10 drinks as quickly as possible to earn bonuses.</li>
                 <li><strong>Take Orders:</strong> Orders will come in automatically; manage up to the maximum orders allowed.</li>
                 <li><strong>Make Drinks:</strong> Select ingredients for each order by clicking on the ingredients under each order.</li>
                 <li><strong>Show/Hide Ingredients:</strong> Use the "Show/Hide Ingredients" button to view or hide the required ingredients for each drink.</li>
-                <li><strong>Time Management:</strong> Serve each drink before its timer runs out to keep customers happy. The timer bar transitions from green to red as time decreases.</li>
+                <li><strong>Time Management:</strong> Serve each drink before its timer runs out. Each drink has 1 minute.</li>
                 <li><strong>Celebrities:</strong> Occasionally, a celebrity will order a special drink. Serve them correctly for big rewards!</li>
                 <li><strong>Earn Money:</strong> Correctly made drinks earn you money based on drink prices and tips.</li>
                 <li><strong>Buy Upgrades:</strong> Use money to purchase upgrades and increase your income.</li>
@@ -463,8 +526,9 @@
         </div>
     </div>
 
-    <!-- Notification Element -->
+    <!-- Notification Elements -->
     <div id="notification"></div>
+    <div id="tipNotification"></div>
 
     <!-- Username Modal -->
     <div id="usernameModal" class="modal">
@@ -509,6 +573,35 @@
         </div>
     </div>
 
+    <!-- Next Level Modal -->
+    <div id="nextLevelModal" class="modal">
+        <div class="modal-content">
+            <h2>Level <span id="nextLevelNumber">1</span> Completed!</h2>
+            <p>You completed the level in <span id="levelTime">0</span> seconds.</p>
+            <p>Prepare for the next level!</p>
+            <p>Level Recap:</p>
+            <ul>
+                <li>Drinks Served: <span id="levelDrinksServed">0</span></li>
+                <li>Tips Earned: $<span id="levelTipsEarned">0.00</span></li>
+                <li>Total Sales: $<span id="levelTotalSales">0.00</span></li>
+            </ul>
+            <button onclick="continueToNextLevel()">Continue to Next Level (<span id="countdown">15</span>)</button>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div id="gameOverModal" class="modal">
+        <div class="modal-content">
+            <h2>Congratulations!</h2>
+            <p>You reached $10 trillion and completed the game!</p>
+            <p>Final Score: <span id="finalScore">0</span></p>
+            <p>Total Tips: $<span id="finalTips">0.00</span></p>
+            <p>Total Sales: $<span id="finalSales">0.00</span></p>
+            <p>Tip Percentage: <span id="tipPercentage">0%</span></p>
+            <button onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
     <!-- JavaScript Code -->
     <script>
         // Game Variables
@@ -527,6 +620,11 @@
         let currentRound = 1;
         let roundStartTime = 0;
         let roundTimerInterval;
+        let levelCountdownInterval;
+        let levelCountdown = 15;
+        let levelDrinksServed = 0;
+        let levelTipsEarned = 0;
+        let levelTotalSales = 0;
 
         // New Game Variables
         let customerSatisfaction = 100; // Percentage
@@ -545,7 +643,15 @@
         let orderInterval;
         let happyHour = false;
         let celebrityChance = 0.1; // 10% chance for a celebrity to appear
-        let celebrities = ["Brad Pitt", "Beyoncé", "Leonardo DiCaprio", "Taylor Swift", "Dwayne Johnson"];
+        let celebrities = [
+            "Brad Pitt", "Beyoncé", "Leonardo DiCaprio", "Taylor Swift", "Dwayne Johnson",
+            "Jennifer Lawrence", "Chris Hemsworth", "Scarlett Johansson", "Tom Hanks", "Emma Stone",
+            "Will Smith", "Angelina Jolie", "Johnny Depp", "Meryl Streep", "Robert Downey Jr.",
+            "Rihanna", "Ed Sheeran", "Ariana Grande", "Justin Bieber", "Lady Gaga",
+            "Kanye West", "Kim Kardashian", "Drake", "Kendrick Lamar", "Katy Perry",
+            "Bruno Mars", "Selena Gomez", "Cardi B", "Billie Eilish", "Post Malone"
+        ];
+        let servedCelebrities = new Set();
         let celebrityOrders = {};
         let celebrityTip = 50;
 
@@ -610,17 +716,17 @@
         // Difficulty Parameters
         const difficultySettings = {
             'Easy': {
-                timePerOrder: 90, // Adjusted time for rounds
+                timePerOrder: 60, // 1 minute per drink
                 maxOrders: 2,
                 ingredientRestockThreshold: 3
             },
             'Medium': {
-                timePerOrder: 70,
+                timePerOrder: 60,
                 maxOrders: 3,
                 ingredientRestockThreshold: 5
             },
             'Hard': {
-                timePerOrder: 50,
+                timePerOrder: 60,
                 maxOrders: 4,
                 ingredientRestockThreshold: 7
             }
@@ -639,9 +745,6 @@
             9: "Master Mixologist",
             10: "World-Class Bartender"
         };
-
-        // Popular Ingredients (for highlighting)
-        const popularIngredients = ["Vodka", "Gin", "Rum", "Tequila", "Whiskey", "Triple Sec", "Lime Juice", "Lemon Juice", "Sugar", "Simple Syrup", "Orange Juice", "Cranberry Juice"];
 
         // Initialize Ingredient Stock and Drink Prices
         function initIngredientStockAndPrices() {
@@ -692,13 +795,26 @@
         function updateStats() {
             document.getElementById("tips").innerText = tips.toFixed(2);
             document.getElementById("drinksMade").innerText = drinksMade;
-            document.getElementById("money").innerText = money.toFixed(2);
-            document.getElementById("totalProfit").innerText = totalProfit.toFixed(2);
+            document.getElementById("money").innerText = formatNumber(money);
+            document.getElementById("totalProfit").innerText = formatNumber(totalProfit);
             document.getElementById("bartenderTitle").innerText = bartenderTitle;
             document.getElementById("incomePerSecond").innerText = incomePerSecond;
             document.getElementById("playerLevel").innerText = playerLevel;
             document.getElementById("username").innerText = username;
             document.getElementById("currentRound").innerText = currentRound;
+
+            // Check for game completion
+            if (money >= 1e13) { // 10 trillion
+                gameOver(true);
+            }
+        }
+
+        // Format large numbers with suffixes
+        function formatNumber(num) {
+            if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
+            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+            return num.toFixed(2);
         }
 
         // Set Username
@@ -745,10 +861,15 @@
             }
 
             let customerName = "Customer";
-            if (isCelebrity) {
-                customerName = celebrities[Math.floor(Math.random() * celebrities.length)];
+            if (isCelebrity && servedCelebrities.size < celebrities.length) {
+                let availableCelebrities = celebrities.filter(c => !servedCelebrities.has(c));
+                customerName = availableCelebrities[Math.floor(Math.random() * availableCelebrities.length)];
                 celebrityOrders[newOrder] = true;
+                servedCelebrities.add(customerName);
+            } else if (isCelebrity) {
+                customerName = celebrities[Math.floor(Math.random() * celebrities.length)] + " (Round Two)";
             }
+
             currentCustomers.push({
                 order: newOrder,
                 timeRemaining: difficultySettings[difficulty].timePerOrder,
@@ -889,7 +1010,7 @@
                 const timePercentage = (timeRemaining / customer.initialTime) * 100;
                 timerBar.style.width = timePercentage + "%";
 
-                // Change color from green to red
+                // Optional: Adjust color from green to red
                 const greenValue = Math.floor((timePercentage / 100) * 255);
                 const redValue = 255 - greenValue;
                 timerBar.style.backgroundColor = `rgb(${redValue}, ${greenValue}, 0)`;
@@ -904,6 +1025,7 @@
         function removeCustomer(index) {
             currentCustomers.splice(index, 1);
             displayOrders();
+            // No need to check for game over here
         }
 
         // Submit Drink for Specific Customer
@@ -919,22 +1041,26 @@
                 let basePrice = drinkPrices[customer.order];
                 if (happyHour) basePrice *= 0.8; // 20% discount during happy hour
                 if (customer.isCelebrity) {
+                    celebrityTip = getRandomTip(true); // Higher tip for celebrities
                     tips += celebrityTip;
                     money += celebrityTip; // Add tip to money
                     totalProfit += basePrice + celebrityTip;
-                    showNotification(`You served ${customer.customerName}! You received a big tip of $${celebrityTip}.`);
+                    showTipNotification(`+ $${formatNumber(celebrityTip)} Tip from ${customer.customerName}!`);
                 } else {
                     const tipAmount = getRandomTip();
                     tips += tipAmount;
                     money += tipAmount; // Add tip to money
                     totalProfit += basePrice + tipAmount;
-                    showTipNotification(`+ $${tipAmount.toFixed(2)} Tip!`);
+                    showTipNotification(`+ $${formatNumber(tipAmount)} Tip!`);
                 }
                 bonusTips += calculateBonusTips();
                 drinksMade++;
+                levelDrinksServed++;
                 money += basePrice;
                 totalProfit += basePrice;
                 dailySales += basePrice;
+                levelTipsEarned += tips;
+                levelTotalSales += basePrice;
                 consecutiveCorrectOrders++;
                 ordersServed++; // Increment orders served
 
@@ -945,9 +1071,10 @@
                     showLevelUpNotification(`Level ${playerLevel}: ${bartenderTitle}!`);
                 }
 
-                // Round Completion Check
+                // Level Completion Check
                 if (drinksMade % 10 === 0) {
-                    completeRound();
+                    completeLevel();
+                    return; // Do not generate new order after level completion
                 }
             } else {
                 customerSatisfaction -= 10;
@@ -967,21 +1094,42 @@
             generateOrder();
         }
 
-        // Complete Round
-        function completeRound() {
+        // Complete Level
+        function completeLevel() {
             clearInterval(roundTimerInterval);
             const roundTime = (Date.now() - roundStartTime) / 1000; // in seconds
-            showNotification(`Round ${currentRound} completed in ${roundTime.toFixed(2)} seconds!`);
-            // Bonus for speed
-            if (roundTime < 120) { // If completed under 2 minutes
-                const speedBonus = 50;
-                money += speedBonus;
-                totalProfit += speedBonus;
-                showNotification(`Speed Bonus! You earned an extra $${speedBonus}!`);
-            }
+            document.getElementById("nextLevelNumber").innerText = currentRound;
+            document.getElementById("levelTime").innerText = roundTime.toFixed(2);
+            document.getElementById("levelDrinksServed").innerText = levelDrinksServed;
+            document.getElementById("levelTipsEarned").innerText = formatNumber(levelTipsEarned);
+            document.getElementById("levelTotalSales").innerText = formatNumber(levelTotalSales);
+
+            document.getElementById("nextLevelModal").style.display = "block";
+            levelCountdown = 15;
+            document.getElementById("countdown").innerText = levelCountdown;
+            levelCountdownInterval = setInterval(() => {
+                levelCountdown--;
+                document.getElementById("countdown").innerText = levelCountdown;
+                if (levelCountdown <= 0) {
+                    clearInterval(levelCountdownInterval);
+                    continueToNextLevel();
+                }
+            }, 1000);
+
+            // Reset level-specific variables
+            levelDrinksServed = 0;
+            levelTipsEarned = 0;
+            levelTotalSales = 0;
+        }
+
+        // Continue to Next Level
+        function continueToNextLevel() {
+            document.getElementById("nextLevelModal").style.display = "none";
+            clearInterval(levelCountdownInterval);
             currentRound++;
             document.getElementById("currentRound").innerText = currentRound;
             startRoundTimer();
+            generateOrder();
         }
 
         // Start Round Timer
@@ -999,10 +1147,40 @@
             if (customerSatisfaction <= 0) {
                 customerSatisfaction = 0;
                 showNotification("Customer satisfaction is at 0%! Game over.");
-                resetGame();
+                gameOver();
             } else if (customerSatisfaction >= 100) {
                 customerSatisfaction = 100;
             }
+        }
+
+        // Check if Game Over
+        function checkGameOver() {
+            // Game over conditions can be added here if needed
+        }
+
+        // Game Over Function
+        function gameOver(gameCompleted = false) {
+            clearInterval(orderInterval);
+            clearInterval(roundTimerInterval);
+            document.getElementById("finalScore").innerText = drinksMade;
+            document.getElementById("finalTips").innerText = formatNumber(tips);
+            document.getElementById("finalSales").innerText = formatNumber(dailySales);
+            const tipPercentage = ((tips / totalProfit) * 100).toFixed(2);
+            document.getElementById("tipPercentage").innerText = tipPercentage + "%";
+            if (gameCompleted) {
+                document.querySelector("#gameOverModal h2").innerText = "Congratulations!";
+                document.querySelector("#gameOverModal p").innerText = "You reached $10 trillion and completed the game!";
+            } else {
+                document.querySelector("#gameOverModal h2").innerText = "Game Over!";
+                document.querySelector("#gameOverModal p").innerText = "Thanks for playing!";
+            }
+            document.getElementById("gameOverModal").style.display = "block";
+        }
+
+        // Restart Game
+        function restartGame() {
+            document.getElementById("gameOverModal").style.display = "none";
+            resetGame();
         }
 
         // Check Ingredient Stock and Restock if Necessary
@@ -1119,8 +1297,10 @@
             playerLevel = 1;
             bartenderTitle = bartenderTitles[playerLevel];
             currentRound = 1;
-            document.getElementById("startGameBtn").disabled = false;
+            servedCelebrities.clear();
             updateStats();
+            // Show Username Modal
+            document.getElementById("usernameModal").style.display = "block";
         }
 
         // Arrays Equal Function
@@ -1135,8 +1315,14 @@
         }
 
         // Get Random Tip
-        function getRandomTip() {
-            return Math.floor(Math.random() * (5 - 1 + 1)) + 1; // Random tip between $1 and $5
+        function getRandomTip(isCelebrity = false) {
+            let minTip = 1 + playerLevel; // Tips increase with level
+            let maxTip = 5 + playerLevel * 2;
+            if (isCelebrity) {
+                minTip *= 2;
+                maxTip *= 2;
+            }
+            return Math.floor(Math.random() * (maxTip - minTip + 1)) + minTip;
         }
 
         // Buy Upgrades
@@ -1172,8 +1358,9 @@
         setInterval(() => {
             money += incomePerSecond;
             totalProfit += incomePerSecond;
-            document.getElementById("money").innerText = money.toFixed(2);
-            document.getElementById("totalProfit").innerText = totalProfit.toFixed(2);
+            document.getElementById("money").innerText = formatNumber(money);
+            document.getElementById("totalProfit").innerText = formatNumber(totalProfit);
+            updateStats();
         }, 1000);
 
         // Start Game Function
@@ -1222,9 +1409,8 @@
 
         // Show Tip Notification
         function showTipNotification(message) {
-            const notification = document.getElementById("notification");
+            const notification = document.getElementById("tipNotification");
             notification.innerText = message;
-            notification.style.backgroundColor = "rgba(39, 174, 96, 0.9)";
             notification.style.display = "block";
             notification.style.opacity = "1";
             notification.style.top = "50%";
@@ -1258,9 +1444,16 @@
             }, 2500);
         }
 
+        // Toggle Rules Display
+        function toggleRules() {
+            const rulesDiv = document.getElementById("rules");
+            rulesDiv.style.display = rulesDiv.style.display === 'block' ? 'none' : 'block';
+        }
+
         // Initialize Event Listeners
         window.onload = function() {
             document.getElementById("startGameBtn").addEventListener("click", startGame);
+            document.getElementById("directionsBtn").addEventListener("click", toggleRules);
         };
     </script>
 </body>
