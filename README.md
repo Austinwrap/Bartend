@@ -270,17 +270,17 @@
             font-size: 2em;
             display: none;
             opacity: 0;
-            transition: opacity 0.3s, transform 0.3s;
+            transition: opacity 0.5s, transform 0.5s;
             z-index: 1001;
             box-shadow: 0 8px 20px rgba(0,0,0,0.3);
             text-align: center;
-            animation: tipFlash 0.6s ease-in-out;
+            animation: tipFlash 1s ease-in-out;
         }
 
         @keyframes tipFlash {
             0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-            50% { transform: translate(-50%, -50%) scale(1.4); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
         }
 
         /* Animation for Level Up */
@@ -418,7 +418,7 @@
             height: 100%;
             pointer-events: none;
             z-index: 999;
-            background: url('https://i.imgur.com/3NZQqXG.gif') center center / cover no-repeat;
+            background: url('https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif') center center / cover no-repeat;
             opacity: 0;
             animation: fireworksAnimation 3s forwards;
         }
@@ -453,6 +453,28 @@
         /* Next Level Modal */
         #nextLevelModal .modal-content {
             max-width: 400px;
+        }
+
+        /* Dropdown Menu Styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.95);
+            min-width: 200px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 10px;
+            border-radius: 10px;
+            z-index: 1;
+            right: 0;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
         }
 
         /* Responsive Design */
@@ -519,9 +541,8 @@
         <!-- Buttons -->
         <div class="buttons-container">
             <button id="startGameBtn">Start Game</button>
-            <button onclick="buyUpgrade('betterShaker')">Better Shaker ($200)</button>
-            <button onclick="buyUpgrade('fancyGlassware')">Fancy Glassware ($500)</button>
-            <button onclick="buyUpgrade('bartenderAssistant')">Hire Assistant ($1000)</button>
+            <!-- Upgrade Buttons will be dynamically generated -->
+            <div id="upgradesContainer"></div>
             <button onclick="openRestockModal()">Restock Ingredients</button>
         </div>
 
@@ -621,12 +642,9 @@
     <div id="gameOverModal" class="modal">
         <div class="modal-content">
             <h2>Game Over!</h2>
-            <p>Thanks for playing!</p>
-            <p>Final Score: <span id="finalScore">0</span></p>
-            <p>Total Tips: $<span id="finalTips">0.00</span></p>
-            <p>Total Sales: $<span id="finalSales">0.00</span></p>
-            <p>Tip Percentage: <span id="tipPercentage">0%</span></p>
-            <button onclick="restartGame()">Play Again</button>
+            <p>Time's up! You didn't complete the orders in time.</p>
+            <p>You must restart the current level.</p>
+            <button onclick="restartLevel()">Restart Level</button>
         </div>
     </div>
 
@@ -739,33 +757,44 @@
         };
 
         // Level Mapping
-        const levelDrinks = {
-            1: ["Water", "Soda", "Beer", "Juice", "Milk", "Lemonade"],
-            2: ["Iced Tea", "Coffee", "Hot Chocolate"],
-            3: ["Gin and Tonic", "Screwdriver"],
-            4: ["Margarita", "Daiquiri"],
-            5: ["Whiskey Sour", "Mojito"],
-            6: ["Cosmopolitan", "Piña Colada"],
-            7: ["Martini", "Old Fashioned"],
-            8: ["Long Island Iced Tea", "Negroni"],
-            9: ["Bloody Mary", "Moscow Mule"],
-            10: ["Singapore Sling", "Hurricane"],
-        };
+        const levelDrinks = {};
+
+        // Assign drinks to levels 1-10
+        for (let i = 1; i <= 10; i++) {
+            levelDrinks[i] = [];
+        }
+
+        levelDrinks[1] = ["Water", "Soda", "Beer", "Juice", "Milk", "Lemonade"];
+        levelDrinks[2] = ["Iced Tea", "Coffee", "Hot Chocolate"];
+        levelDrinks[3] = ["Gin and Tonic", "Screwdriver"];
+        levelDrinks[4] = ["Margarita", "Daiquiri"];
+        levelDrinks[5] = ["Whiskey Sour", "Mojito"];
+        levelDrinks[6] = ["Cosmopolitan", "Piña Colada"];
+        levelDrinks[7] = ["Martini", "Old Fashioned"];
+        levelDrinks[8] = ["Long Island Iced Tea", "Negroni"];
+        levelDrinks[9] = ["Bloody Mary", "Moscow Mule"];
+        levelDrinks[10] = ["Singapore Sling", "Hurricane"];
+
+        // Extend levelDrinks up to level 100 by grouping levels in tens
+        for (let level = 11; level <= 100; level++) {
+            const baseLevel = ((level - 1) % 10) + 1;
+            levelDrinks[level] = levelDrinks[baseLevel];
+        }
 
         // Difficulty Parameters
         const difficultySettings = {
             'Easy': {
-                timePerOrder: 60, // Not used now
+                timePerOrder: 90,
                 maxOrders: 2,
                 ingredientRestockThreshold: 3
             },
             'Medium': {
-                timePerOrder: 60,
+                timePerOrder: 90,
                 maxOrders: 3,
                 ingredientRestockThreshold: 5
             },
             'Hard': {
-                timePerOrder: 60,
+                timePerOrder: 90,
                 maxOrders: 4,
                 ingredientRestockThreshold: 7
             }
@@ -774,26 +803,49 @@
         // Bartender Titles
         const bartenderTitles = {
             1: "Novice Mixer",
-            2: "Apprentice Bartender",
-            3: "Junior Bartender",
-            4: "Bartender",
-            5: "Senior Bartender",
-            6: "Mixologist",
-            7: "Expert Mixologist",
-            8: "Head Bartender",
-            9: "Master Mixologist",
-            10: "World-Class Bartender"
+            11: "Apprentice Bartender",
+            21: "Junior Bartender",
+            31: "Bartender",
+            41: "Senior Bartender",
+            51: "Mixologist",
+            61: "Expert Mixologist",
+            71: "Head Bartender",
+            81: "Master Mixologist",
+            91: "World-Class Bartender",
+            100: "Ultimate Fame Bartender"
         };
+
+        // Upgrades List
+        const upgrades = [
+            { name: "Better Shaker", cost: 200, benefit: 5 },
+            { name: "Fancy Glassware", cost: 500, benefit: 10 },
+            { name: "Bartender Assistant", cost: 1000, benefit: 20 },
+            { name: "Renovated Bar", cost: 5000, benefit: 50 },
+            { name: "Live Music", cost: 10000, benefit: 100 },
+            { name: "Second Bar", cost: 50000, benefit: 500 },
+            { name: "Chain of Bars", cost: 250000, benefit: 2000 },
+            { name: "Small Restaurant", cost: 1000000, benefit: 5000 },
+            { name: "Fine Dining Restaurant", cost: 5000000, benefit: 20000 },
+            { name: "Luxury Hotel", cost: 20000000, benefit: 50000 },
+            { name: "Rooftop Suite", cost: 100000000, benefit: 200000 },
+            { name: "Casino", cost: 500000000, benefit: 1000000 },
+            { name: "Resort Chain", cost: 2000000000, benefit: 5000000 },
+            { name: "Global Franchise", cost: 10000000000, benefit: 20000000 },
+        ];
 
         // Initialize Ingredient Stock and Drink Prices
         function initIngredientStockAndPrices() {
             const uniqueIngredients = new Set();
-            const potentialDrinks = getPotentialDrinks();
-            potentialDrinks.forEach(drink => {
-                const ingredients = drinkRecipes[drink];
-                ingredients.forEach(ingredient => uniqueIngredients.add(ingredient));
-                drinkPrices[drink] = calculateBaseDrinkPrice(ingredients);
-            });
+            // Collect drinks from levels 1 to 100
+            for (let level = 1; level <= 100; level++) {
+                levelDrinks[level].forEach(drink => {
+                    const ingredients = drinkRecipes[drink];
+                    ingredients.forEach(ingredient => uniqueIngredients.add(ingredient));
+                    if (!drinkPrices[drink]) { // Set price if not already set
+                        drinkPrices[drink] = calculateBaseDrinkPrice(ingredients);
+                    }
+                });
+            }
             uniqueIngredients.forEach(ingredient => {
                 if (!isEssentialIngredient(ingredient)) {
                     if (!ingredientStock[ingredient]) {
@@ -803,26 +855,22 @@
             });
         }
 
-        // Get Potential Drinks Based on Player Level and Possible Orders
+        // Get Potential Drinks Based on Player Level
         function getPotentialDrinks() {
             let drinks = [];
             for (let i = 1; i <= playerLevel; i++) {
-                drinks = drinks.concat(levelDrinks[i]);
-            }
-            // Include Level 2 drinks if playerLevel is 1, since generateOrder() can include Level 2 drinks
-            if (playerLevel === 1) {
-                drinks = drinks.concat(levelDrinks[2]);
+                levelDrinks[i].forEach(drink => {
+                    if (!drinks.includes(drink)) {
+                        drinks.push(drink);
+                    }
+                });
             }
             return drinks;
         }
 
         // Get Available Drinks Based on Player Level
         function getAvailableDrinks() {
-            let drinks = [];
-            for (let i = 1; i <= playerLevel; i++) {
-                drinks = drinks.concat(levelDrinks[i]);
-            }
-            return drinks;
+            return getPotentialDrinks();
         }
 
         // Calculate Base Drink Price Based on Ingredients
@@ -837,7 +885,7 @@
             document.getElementById("money").innerText = formatNumber(money);
             document.getElementById("totalProfit").innerText = formatNumber(totalProfit);
             document.getElementById("bartenderTitle").innerText = bartenderTitle;
-            document.getElementById("incomePerSecond").innerText = incomePerSecond;
+            document.getElementById("incomePerSecond").innerText = formatNumber(incomePerSecond);
             document.getElementById("playerLevel").innerText = playerLevel;
             document.getElementById("username").innerText = username;
             document.getElementById("currentRound").innerText = currentRound;
@@ -875,29 +923,12 @@
 
         // Generate Customer Order
         function generateOrder() {
-            if (currentCustomers.length >= maxOrdersAtOnce) return;
-
+            // No limit on max orders to allow tickets to pile up
             let isCelebrity = Math.random() < celebrityChance;
             const availableDrinks = getAvailableDrinks();
             let potentialDrinks = [...availableDrinks];
 
-            // Include Level 2 drinks in Level 1 with lower probability
-            if (playerLevel === 1) {
-                potentialDrinks = potentialDrinks.concat(levelDrinks[2]);
-            }
-
-            let newOrder;
-
-            // Ensure more easy drinks in early levels with occasional harder ones
-            if (playerLevel === 1) {
-                if (Math.random() < 0.8) {
-                    newOrder = levelDrinks[1][Math.floor(Math.random() * levelDrinks[1].length)];
-                } else {
-                    newOrder = levelDrinks[2][Math.floor(Math.random() * levelDrinks[2].length)];
-                }
-            } else {
-                newOrder = potentialDrinks[Math.floor(Math.random() * potentialDrinks.length)];
-            }
+            let newOrder = potentialDrinks[Math.floor(Math.random() * potentialDrinks.length)];
 
             let customerName = "Customer";
             if (isCelebrity && servedCelebrities.size < celebrities.length) {
@@ -915,6 +946,8 @@
                 showIngredients: false,
                 customerName: customerName,
                 isCelebrity: isCelebrity,
+                timeRemaining: difficultySettings[difficulty].timePerOrder,
+                timerInterval: null,
             });
             displayOrders();
         }
@@ -931,6 +964,7 @@
                 }
                 orderDiv.innerHTML = `
                     <p><strong>${customer.isCelebrity ? 'Celebrity Order' : 'Order'} ${index + 1}:</strong> ${customer.isCelebrity ? customer.customerName + ' wants a ' : ''}${customer.order}</p>
+                    <p>Time Remaining: <span id="orderTimer${index}">${customer.timeRemaining}s</span></p>
                     <p>Selected: <span id="customerIngredients${index}">${customer.selectedIngredients.join(", ")}</span></p>
                     <button class="toggle-ingredients-btn" onclick="toggleIngredients(${index})">Show/Hide Ingredients</button>
                     <div class="required-ingredients" id="requiredIngredients${index}" style="display: none;">
@@ -943,7 +977,23 @@
 
                 // Generate ingredients buttons for this order
                 generateIngredientsListForOrder(index);
+                // Start the timer for this order
+                startOrderTimer(index);
             });
+        }
+
+        // Start Order Timer
+        function startOrderTimer(orderIndex) {
+            const customer = currentCustomers[orderIndex];
+            if (customer.timerInterval) clearInterval(customer.timerInterval);
+            customer.timerInterval = setInterval(() => {
+                customer.timeRemaining--;
+                document.getElementById(`orderTimer${orderIndex}`).innerText = `${customer.timeRemaining}s`;
+                if (customer.timeRemaining <= 0) {
+                    clearInterval(customer.timerInterval);
+                    gameOver(false, "Time's up! You didn't complete the orders in time.");
+                }
+            }, 1000);
         }
 
         // Toggle Ingredients Visibility
@@ -1021,6 +1071,7 @@
 
         // Remove Customer from Current Orders
         function removeCustomer(index) {
+            clearInterval(currentCustomers[index].timerInterval);
             currentCustomers.splice(index, 1);
             displayOrders();
             // No need to check for game over here
@@ -1063,9 +1114,13 @@
                 ordersServed++; // Increment orders served
 
                 // Level Up Check
-                if (drinksMade % 10 === 0 && playerLevel < 10) {
+                if (drinksMade % 10 === 0 && playerLevel < 100) {
                     playerLevel++;
-                    bartenderTitle = bartenderTitles[playerLevel];
+                    // Update bartender title based on groups of ten
+                    const groupLevel = Math.floor((playerLevel - 1) / 10) * 10 + 1;
+                    if (bartenderTitles[groupLevel]) {
+                        bartenderTitle = bartenderTitles[groupLevel];
+                    }
                     showLevelUpNotification(`Level ${playerLevel}: ${bartenderTitle}!`);
                 }
 
@@ -1095,6 +1150,9 @@
         // Complete Level
         function completeLevel() {
             clearInterval(roundTimerInterval);
+            currentCustomers.forEach(customer => {
+                clearInterval(customer.timerInterval);
+            });
             const roundTime = (Date.now() - roundStartTime) / 1000; // in seconds
             document.getElementById("nextLevelNumber").innerText = currentRound;
             document.getElementById("levelTime").innerText = roundTime.toFixed(2);
@@ -1145,21 +1203,19 @@
             if (customerSatisfaction <= 0) {
                 customerSatisfaction = 0;
                 showNotification("Customer satisfaction is at 0%! Game over.");
-                gameOver();
+                gameOver(false, "Customer satisfaction reached zero.");
             } else if (customerSatisfaction >= 100) {
                 customerSatisfaction = 100;
             }
         }
 
-        // Check if Game Over
-        function checkGameOver() {
-            // Game over conditions can be added here if needed
-        }
-
         // Game Over Function
-        function gameOver(gameCompleted = false) {
+        function gameOver(gameCompleted = false, message = "") {
             clearInterval(orderInterval);
             clearInterval(roundTimerInterval);
+            currentCustomers.forEach(customer => {
+                clearInterval(customer.timerInterval);
+            });
             if (gameCompleted) {
                 document.getElementById("celebrationUsername").innerText = username;
                 document.getElementById("finalMoney").innerText = formatNumber(money);
@@ -1169,12 +1225,10 @@
                     document.getElementById("fireworks").style.display = "none";
                 }, 3000);
             } else {
-                document.getElementById("finalScore").innerText = drinksMade;
-                document.getElementById("finalTips").innerText = formatNumber(tips);
-                document.getElementById("finalSales").innerText = formatNumber(dailySales);
-                const tipPercentage = ((tips / totalProfit) * 100).toFixed(2);
-                document.getElementById("tipPercentage").innerText = tipPercentage + "%";
                 document.getElementById("gameOverModal").style.display = "block";
+                if (message) {
+                    document.querySelector("#gameOverModal .modal-content p").innerText = message;
+                }
             }
         }
 
@@ -1183,6 +1237,18 @@
             document.getElementById("gameOverModal").style.display = "none";
             document.getElementById("celebrationModal").style.display = "none";
             resetGame();
+        }
+
+        // Restart Level
+        function restartLevel() {
+            document.getElementById("gameOverModal").style.display = "none";
+            currentCustomers = [];
+            drinksMade = drinksMade - (drinksMade % 10); // Reset drinks made to the start of the level
+            playerLevel = playerLevel - (playerLevel % 10);
+            if (playerLevel < 1) playerLevel = 1;
+            bartenderTitle = bartenderTitles[playerLevel];
+            startRoundTimer();
+            generateOrder();
         }
 
         // Check Ingredient Stock and Restock if Necessary
@@ -1325,31 +1391,62 @@
         }
 
         // Buy Upgrades
-        function buyUpgrade(upgrade) {
-            let cost = 0;
-            let benefit = 0;
-            switch (upgrade) {
-                case 'betterShaker':
-                    cost = 200;
-                    benefit = 5;
-                    break;
-                case 'fancyGlassware':
-                    cost = 500;
-                    benefit = 10;
-                    break;
-                case 'bartenderAssistant':
-                    cost = 1000;
-                    benefit = 20;
-                    break;
-            }
-            if (money >= cost) {
-                money -= cost;
-                incomePerSecond += benefit;
-                showNotification(`Upgrade purchased: ${upgrade.replace(/([A-Z])/g, ' $1').trim()}! Income per second increased.`);
-                document.getElementById("incomePerSecond").innerText = incomePerSecond;
-                updateStats();
+        function buyUpgrade(index) {
+            const upgrade = upgrades[index];
+            if (upgrade && !upgrade.purchased) {
+                if (money >= upgrade.cost) {
+                    money -= upgrade.cost;
+                    incomePerSecond += upgrade.benefit;
+                    upgrade.purchased = true;
+                    showNotification(`Upgrade purchased: ${upgrade.name}! Income per second increased.`);
+                    document.getElementById("incomePerSecond").innerText = formatNumber(incomePerSecond);
+                    updateStats();
+                    renderUpgrades();
+                } else {
+                    showNotification("Not enough money for this upgrade.");
+                }
             } else {
-                showNotification("Not enough money for this upgrade.");
+                showNotification("Upgrade already purchased.");
+            }
+        }
+
+        // Render Upgrades
+        function renderUpgrades() {
+            const upgradesContainer = document.getElementById("upgradesContainer");
+            upgradesContainer.innerHTML = '';
+
+            const basicUpgrades = upgrades.filter(upg => upg.cost <= 1000 && !upg.purchased);
+            const advancedUpgrades = upgrades.filter(upg => upg.cost > 1000 && !upg.purchased);
+
+            basicUpgrades.forEach((upgrade, index) => {
+                const btn = document.createElement("button");
+                btn.innerText = `${upgrade.name} ($${formatNumber(upgrade.cost)})`;
+                btn.onclick = () => buyUpgrade(index);
+                upgradesContainer.appendChild(btn);
+            });
+
+            if (advancedUpgrades.length > 0) {
+                const dropdown = document.createElement("div");
+                dropdown.classList.add("dropdown");
+                const dropBtn = document.createElement("button");
+                dropBtn.innerText = "More Upgrades";
+                dropdown.appendChild(dropBtn);
+
+                const dropdownContent = document.createElement("div");
+                dropdownContent.classList.add("dropdown-content");
+
+                advancedUpgrades.forEach((upgrade, index) => {
+                    const btn = document.createElement("button");
+                    btn.innerText = `${upgrade.name} ($${formatNumber(upgrade.cost)})`;
+                    btn.style.display = 'block';
+                    btn.style.width = '100%';
+                    btn.style.margin = '5px 0';
+                    btn.onclick = () => buyUpgrade(upgrades.indexOf(upgrade));
+                    dropdownContent.appendChild(btn);
+                });
+
+                dropdown.appendChild(dropdownContent);
+                upgradesContainer.appendChild(dropdown);
             }
         }
 
@@ -1380,11 +1477,11 @@
             updateStats();
             maxOrdersAtOnce = difficultySettings[difficulty].maxOrders;
             ingredientRestockThreshold = difficultySettings[difficulty].ingredientRestockThreshold;
+            renderUpgrades(); // Render upgrades on game start
             generateOrder();
             orderInterval = setInterval(() => {
                 generateOrder();
-                // Randomize order interval for variable flow
-            }, Math.floor(Math.random() * (10000 - 5000 + 1)) + 5000); // New customer every 5-10 seconds
+            }, 5000); // New customer every 5 seconds
             startRoundTimer(); // Start the round timer
         }
 
@@ -1412,15 +1509,18 @@
             notification.innerText = message;
             notification.style.display = "block";
             notification.style.opacity = "1";
-            notification.style.transform = "translate(-50%, -50%) scale(1.4)";
+            notification.style.transform = "translate(-50%, -50%) scale(1.2)";
 
             setTimeout(() => {
-                notification.style.opacity = "0";
+                notification.style.opacity = "1";
                 notification.style.transform = "translate(-50%, -50%) scale(1)";
                 setTimeout(() => {
-                    notification.style.display = "none";
-                }, 300);
-            }, 600);
+                    notification.style.opacity = "0";
+                    setTimeout(() => {
+                        notification.style.display = "none";
+                    }, 500);
+                }, 1500); // Display the tip notification longer
+            }, 500);
         }
 
         // Show Level Up Notification
