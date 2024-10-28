@@ -159,16 +159,6 @@
             box-shadow: 0 3px 5px rgba(0,0,0,0.2);
         }
 
-        .timer-bar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 5px;
-            background-color: #4caf50;
-            width: 100%;
-            transition: width 0.1s linear, background-color 0.5s linear;
-        }
-
         .ingredients-container {
             margin-bottom: 15px;
         }
@@ -267,29 +257,29 @@
             text-align: center;
         }
 
-        /* Tip Notification Styles */
+        /* Enhanced Tip Notification Styles */
         #tipNotification {
             position: fixed;
-            top: 40%;
+            top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: rgba(39, 174, 96, 0.9);
+            background: radial-gradient(circle at center, #fffa65, #f39c12);
             color: #fff;
             padding: 30px 40px;
             border-radius: 50px;
             font-size: 2em;
             display: none;
             opacity: 0;
-            transition: opacity 0.5s, top 0.5s;
+            transition: opacity 0.3s, transform 0.3s;
             z-index: 1001;
             box-shadow: 0 8px 20px rgba(0,0,0,0.3);
             text-align: center;
-            animation: tipFlash 1s ease-in-out;
+            animation: tipFlash 0.6s ease-in-out;
         }
 
         @keyframes tipFlash {
             0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-            50% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.4); opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
         }
 
@@ -516,7 +506,6 @@
                 <li><strong>Take Orders:</strong> Orders will come in automatically; manage up to the maximum orders allowed.</li>
                 <li><strong>Make Drinks:</strong> Select ingredients for each order by clicking on the ingredients under each order.</li>
                 <li><strong>Show/Hide Ingredients:</strong> Use the "Show/Hide Ingredients" button to view or hide the required ingredients for each drink.</li>
-                <li><strong>Time Management:</strong> Serve each drink before its timer runs out. Each drink has 1 minute.</li>
                 <li><strong>Celebrities:</strong> Occasionally, a celebrity will order a special drink. Serve them correctly for big rewards!</li>
                 <li><strong>Earn Money:</strong> Correctly made drinks earn you money based on drink prices and tips.</li>
                 <li><strong>Buy Upgrades:</strong> Use money to purchase upgrades and increase your income.</li>
@@ -716,7 +705,7 @@
         // Difficulty Parameters
         const difficultySettings = {
             'Easy': {
-                timePerOrder: 60, // 1 minute per drink
+                timePerOrder: 60, // Not used now
                 maxOrders: 2,
                 ingredientRestockThreshold: 3
             },
@@ -872,17 +861,12 @@
 
             currentCustomers.push({
                 order: newOrder,
-                timeRemaining: difficultySettings[difficulty].timePerOrder,
-                timerInterval: null,
                 selectedIngredients: [],
                 showIngredients: false,
                 customerName: customerName,
                 isCelebrity: isCelebrity,
-                orderStartTime: Date.now(),
-                initialTime: difficultySettings[difficulty].timePerOrder * 1000 // in milliseconds
             });
             displayOrders();
-            startCustomerTimer(currentCustomers.length - 1);
         }
 
         // Display Current Orders
@@ -897,7 +881,6 @@
                 }
                 orderDiv.innerHTML = `
                     <p><strong>${customer.isCelebrity ? 'Celebrity Order' : 'Order'} ${index + 1}:</strong> ${customer.isCelebrity ? customer.customerName + ' wants a ' : ''}${customer.order}</p>
-                    <div class="timer-bar" id="timerBar${index}"></div>
                     <p>Selected: <span id="customerIngredients${index}">${customer.selectedIngredients.join(", ")}</span></p>
                     <button class="toggle-ingredients-btn" onclick="toggleIngredients(${index})">Show/Hide Ingredients</button>
                     <div class="required-ingredients" id="requiredIngredients${index}" style="display: none;">
@@ -984,41 +967,6 @@
             checkIngredientStock();
             // Update the ingredient buttons to reflect stock changes
             generateIngredientsListForOrder(orderIndex);
-        }
-
-        // Start Customer Timer
-        function startCustomerTimer(customerIndex) {
-            const customer = currentCustomers[customerIndex];
-            function updateTimer() {
-                const elapsedTime = Date.now() - customer.orderStartTime;
-                const timeRemaining = customer.initialTime - elapsedTime;
-                customer.timeRemaining = timeRemaining / 1000; // convert to seconds
-
-                if (timeRemaining <= 0) {
-                    customer.timeRemaining = 0;
-                    clearInterval(customer.timerInterval);
-                    lostCustomers++;
-                    customerSatisfaction -= 5;
-                    checkCustomerSatisfaction();
-                    showNotification(`Time's up for Order ${customerIndex + 1}! You lost a customer.`);
-                    removeCustomer(customerIndex);
-                    return;
-                }
-
-                // Update Timer Bar
-                const timerBar = document.getElementById(`timerBar${customerIndex}`);
-                const timePercentage = (timeRemaining / customer.initialTime) * 100;
-                timerBar.style.width = timePercentage + "%";
-
-                // Optional: Adjust color from green to red
-                const greenValue = Math.floor((timePercentage / 100) * 255);
-                const redValue = 255 - greenValue;
-                timerBar.style.backgroundColor = `rgb(${redValue}, ${greenValue}, 0)`;
-
-                requestAnimationFrame(updateTimer);
-            }
-
-            requestAnimationFrame(updateTimer);
         }
 
         // Remove Customer from Current Orders
@@ -1285,9 +1233,6 @@
             totalCustomersServed = 0;
             lostCustomers = 0;
             consecutiveCorrectOrders = 0;
-            currentCustomers.forEach(customer => {
-                clearInterval(customer.timerInterval);
-            });
             currentCustomers = [];
             clearInterval(orderInterval);
             clearInterval(roundTimerInterval);
@@ -1385,7 +1330,7 @@
             orderInterval = setInterval(() => {
                 generateOrder();
                 // Randomize order interval for variable flow
-            }, Math.floor(Math.random() * (15000 - 5000 + 1)) + 5000); // New customer every 5-15 seconds
+            }, Math.floor(Math.random() * (10000 - 5000 + 1)) + 5000); // New customer every 5-10 seconds
             startRoundTimer(); // Start the round timer
         }
 
@@ -1413,15 +1358,15 @@
             notification.innerText = message;
             notification.style.display = "block";
             notification.style.opacity = "1";
-            notification.style.top = "50%";
+            notification.style.transform = "translate(-50%, -50%) scale(1.4)";
 
             setTimeout(() => {
                 notification.style.opacity = "0";
-                notification.style.top = "40%";
+                notification.style.transform = "translate(-50%, -50%) scale(1)";
                 setTimeout(() => {
                     notification.style.display = "none";
-                }, 500);
-            }, 1500);
+                }, 300);
+            }, 600);
         }
 
         // Show Level Up Notification
