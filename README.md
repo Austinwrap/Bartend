@@ -290,6 +290,13 @@
             100% { transform: scale(1); opacity: 0; }
         }
 
+        /* Celebration Animation */
+        @keyframes celebration {
+            0% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 0; transform: scale(1); }
+        }
+
         /* Modal Styles */
         .modal {
             display: none;
@@ -393,6 +400,34 @@
         /* Game Over Modal */
         #gameOverModal .modal-content {
             max-width: 400px;
+        }
+
+        /* Celebration Modal */
+        #celebrationModal .modal-content {
+            max-width: 500px;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            color: #fff;
+        }
+
+        /* Fireworks Animation */
+        .fireworks {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            background: url('https://i.imgur.com/3NZQqXG.gif') center center / cover no-repeat;
+            opacity: 0;
+            animation: fireworksAnimation 3s forwards;
+        }
+
+        @keyframes fireworksAnimation {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; }
         }
 
         /* Directions Button */
@@ -511,6 +546,7 @@
                 <li><strong>Buy Upgrades:</strong> Use money to purchase upgrades and increase your income.</li>
                 <li><strong>Restock Ingredients:</strong> Use the "Restock Ingredients" button to purchase more ingredients.</li>
                 <li><strong>Level Up:</strong> Make drinks to advance levels and earn new bartender titles.</li>
+                <li><strong>Win the Game:</strong> Reach $10 trillion to become the Ultimate Fame Bartender and win the game!</li>
             </ul>
         </div>
     </div>
@@ -518,6 +554,9 @@
     <!-- Notification Elements -->
     <div id="notification"></div>
     <div id="tipNotification"></div>
+
+    <!-- Fireworks -->
+    <div id="fireworks" class="fireworks"></div>
 
     <!-- Username Modal -->
     <div id="usernameModal" class="modal">
@@ -581,12 +620,23 @@
     <!-- Game Over Modal -->
     <div id="gameOverModal" class="modal">
         <div class="modal-content">
-            <h2>Congratulations!</h2>
-            <p>You reached $10 trillion and completed the game!</p>
+            <h2>Game Over!</h2>
+            <p>Thanks for playing!</p>
             <p>Final Score: <span id="finalScore">0</span></p>
             <p>Total Tips: $<span id="finalTips">0.00</span></p>
             <p>Total Sales: $<span id="finalSales">0.00</span></p>
             <p>Tip Percentage: <span id="tipPercentage">0%</span></p>
+            <button onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <!-- Celebration Modal -->
+    <div id="celebrationModal" class="modal">
+        <div class="modal-content">
+            <h2>Congratulations, <span id="celebrationUsername">Player</span>!</h2>
+            <p>You have become the <strong>Ultimate Fame Bartender</strong>!</p>
+            <p>You reached $<span id="finalMoney">10 Trillion</span>!</p>
+            <p>Your journey has been legendary. Thank you for playing!</p>
             <button onclick="restartGame()">Play Again</button>
         </div>
     </div>
@@ -1110,24 +1160,28 @@
         function gameOver(gameCompleted = false) {
             clearInterval(orderInterval);
             clearInterval(roundTimerInterval);
-            document.getElementById("finalScore").innerText = drinksMade;
-            document.getElementById("finalTips").innerText = formatNumber(tips);
-            document.getElementById("finalSales").innerText = formatNumber(dailySales);
-            const tipPercentage = ((tips / totalProfit) * 100).toFixed(2);
-            document.getElementById("tipPercentage").innerText = tipPercentage + "%";
             if (gameCompleted) {
-                document.querySelector("#gameOverModal h2").innerText = "Congratulations!";
-                document.querySelector("#gameOverModal p").innerText = "You reached $10 trillion and completed the game!";
+                document.getElementById("celebrationUsername").innerText = username;
+                document.getElementById("finalMoney").innerText = formatNumber(money);
+                document.getElementById("celebrationModal").style.display = "block";
+                document.getElementById("fireworks").style.display = "block";
+                setTimeout(() => {
+                    document.getElementById("fireworks").style.display = "none";
+                }, 3000);
             } else {
-                document.querySelector("#gameOverModal h2").innerText = "Game Over!";
-                document.querySelector("#gameOverModal p").innerText = "Thanks for playing!";
+                document.getElementById("finalScore").innerText = drinksMade;
+                document.getElementById("finalTips").innerText = formatNumber(tips);
+                document.getElementById("finalSales").innerText = formatNumber(dailySales);
+                const tipPercentage = ((tips / totalProfit) * 100).toFixed(2);
+                document.getElementById("tipPercentage").innerText = tipPercentage + "%";
+                document.getElementById("gameOverModal").style.display = "block";
             }
-            document.getElementById("gameOverModal").style.display = "block";
         }
 
         // Restart Game
         function restartGame() {
             document.getElementById("gameOverModal").style.display = "none";
+            document.getElementById("celebrationModal").style.display = "none";
             resetGame();
         }
 
@@ -1277,15 +1331,15 @@
             switch (upgrade) {
                 case 'betterShaker':
                     cost = 200;
-                    benefit = 1;
+                    benefit = 5;
                     break;
                 case 'fancyGlassware':
                     cost = 500;
-                    benefit = 2;
+                    benefit = 10;
                     break;
                 case 'bartenderAssistant':
                     cost = 1000;
-                    benefit = 5;
+                    benefit = 20;
                     break;
             }
             if (money >= cost) {
