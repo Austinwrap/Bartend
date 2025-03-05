@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -11,6 +12,8 @@
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none; /* Prevent text selection on tap */
+            user-select: none;
         }
 
         body {
@@ -19,28 +22,29 @@
             color: #333;
             overflow-x: hidden;
             touch-action: manipulation;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
         }
 
         h1 {
             font-family: 'Pacifico', cursive;
             color: #fff;
             text-align: center;
-            margin: 20px 0;
-            font-size: 2em;
-            text-shadow: 0 0 10px rgba(255,255,255,0.8);
-            -webkit-text-stroke: 1px #333;
+            margin: 15px 0;
+            font-size: 1.8em;
+            text-shadow: 0 0 8px rgba(255,255,255,0.8);
+            -webkit-text-stroke: 0.5px #333;
         }
 
         h1::before, h1::after {
             content: '✦';
             position: absolute;
-            font-size: 1.2em;
+            font-size: 1em;
             color: #fff;
             animation: twinkle 2s infinite;
         }
 
-        h1::before { top: -8px; left: -20px; }
-        h1::after { top: -8px; right: -20px; }
+        h1::before { top: -6px; left: -15px; }
+        h1::after { top: -6px; right: -15px; }
 
         @keyframes twinkle {
             0%, 100% { opacity: 0.2; transform: scale(1); }
@@ -65,17 +69,17 @@
             background: linear-gradient(to bottom right, #ff9a9e, #fad0c4);
             color: #fff;
             border: none;
-            border-radius: 25px;
-            padding: 12px 25px;
-            font-size: 1.2em;
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-size: 1.1em;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
         }
 
         #enter-btn:hover, #enter-btn:active {
-            transform: scale(1.1);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+            transform: scale(1.05);
+            box-shadow: 0 5px 12px rgba(0,0,0,0.3);
         }
 
         .popup {
@@ -84,17 +88,17 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: linear-gradient(135deg, #ffeb3b, #ff4081);
-            padding: 15px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3), 0 0 20px #ff4081;
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 0 15px #ff4081;
             z-index: 1000;
             text-align: center;
             opacity: 0;
             transition: opacity 0.5s ease;
             color: #fff;
-            width: 90%;
-            max-width: 320px;
-            font-size: 0.9em;
+            width: 85%;
+            max-width: 300px;
+            font-size: 0.85em;
         }
 
         .popup.show {
@@ -103,9 +107,9 @@
 
         .popup h2 {
             color: #fff;
-            margin-bottom: 10px;
-            text-shadow: 0 0 5px #ffeb3b;
-            font-size: 1.2em;
+            margin-bottom: 8px;
+            text-shadow: 0 0 4px #ffeb3b;
+            font-size: 1.1em;
         }
 
         .popup ul {
@@ -114,25 +118,25 @@
         }
 
         .popup li {
-            padding: 4px 0;
-            font-size: 0.9em;
-            text-shadow: 0 0 3px #000;
+            padding: 3px 0;
+            font-size: 0.85em;
+            text-shadow: 0 0 2px #000;
         }
 
         .popup .close-btn {
             position: absolute;
-            top: 8px;
-            right: 8px;
+            top: 6px;
+            right: 6px;
             background: #ff4081;
             color: #fff;
             border: none;
             border-radius: 50%;
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             cursor: pointer;
-            box-shadow: 0 0 5px #ffeb3b;
-            font-size: 0.8em;
-            line-height: 18px;
+            box-shadow: 0 0 4px #ffeb3b;
+            font-size: 0.7em;
+            line-height: 16px;
         }
 
         #notification {
@@ -142,15 +146,15 @@
             transform: translate(-50%, -50%);
             background: linear-gradient(to right, #00e676, #00c853);
             color: #fff;
-            padding: 15px 25px;
-            border-radius: 25px;
-            font-size: 1em;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
             display: none;
             opacity: 0;
             transition: opacity 0.5s;
             z-index: 1001;
-            box-shadow: 0 0 10px #00e676;
-            max-width: 90%;
+            box-shadow: 0 0 8px #00e676;
+            max-width: 85%;
         }
 
         #tip-notification {
@@ -160,21 +164,21 @@
             transform: translate(-50%, -50%);
             background: linear-gradient(to right, #ffeb3b, #ff9100);
             color: #fff;
-            padding: 20px 30px;
-            border-radius: 30px;
-            font-size: 1.2em;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 1em;
             display: none;
             opacity: 0;
             transition: opacity 0.5s;
             z-index: 1002;
             animation: tipFlash 1s ease-in-out;
-            box-shadow: 0 0 15px #ffeb3b;
-            max-width: 90%;
+            box-shadow: 0 0 12px #ffeb3b;
+            max-width: 85%;
         }
 
         @keyframes tipFlash {
             0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
         }
 
@@ -182,7 +186,7 @@
             max-width: 100%;
             width: 100%;
             margin: 0 auto;
-            padding: 10px;
+            padding: 5px;
             display: none;
         }
 
@@ -191,21 +195,21 @@
             flex-wrap: wrap;
             justify-content: space-between;
             background: rgba(255, 255, 255, 0.85);
-            padding: 8px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            font-size: 0.9em;
+            padding: 6px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            font-size: 0.8em;
         }
 
         .status-item {
             flex: 1 1 45%;
-            margin: 3px 0;
+            margin: 2px 0;
             text-align: center;
         }
 
         .money-display {
-            font-size: 1.1em;
+            font-size: 1em;
             color: #ff6b6b;
             font-weight: bold;
         }
@@ -214,44 +218,44 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         button {
             background: linear-gradient(to bottom right, #ff9a9e, #fad0c4);
             color: #fff;
             border: none;
-            border-radius: 25px;
-            padding: 8px 15px;
-            margin: 5px;
+            border-radius: 20px;
+            padding: 6px 12px;
+            margin: 3px;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            font-size: 0.9em;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            font-size: 0.8em;
             touch-action: manipulation;
         }
 
         button:hover, button:active {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         .order-display {
             background: rgba(255, 255, 255, 0.9);
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
         }
 
         .ticket {
             background: #fff;
-            padding: 8px;
-            margin-bottom: 8px;
-            border-left: 4px solid #ff6b6b;
-            border-radius: 5px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-            font-size: 0.85em;
+            padding: 6px;
+            margin-bottom: 6px;
+            border-left: 3px solid #ff6b6b;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-size: 0.75em;
         }
 
         .ticket.celebrity {
@@ -262,18 +266,23 @@
             background: #f0f0f0;
             color: #333;
             border: 1px solid #ccc;
-            border-radius: 20px;
-            padding: 6px 12px;
-            margin: 3px;
+            border-radius: 18px;
+            padding: 5px 10px;
+            margin: 2px;
             cursor: pointer;
             transition: all 0.2s ease;
-            font-size: 0.8em;
+            font-size: 0.7em;
             touch-action: manipulation;
+            min-width: 60px; /* Ensure tappable size */
+            height: 30px; /* Consistent height */
+            line-height: 20px;
+            display: inline-block;
+            text-align: center;
         }
 
         .ingredient-button:hover, .ingredient-button:active {
             background: #e0e0e0;
-            transform: translateY(-2px);
+            transform: translateY(-1px);
         }
 
         .ingredient-button.selected {
@@ -295,16 +304,19 @@
             background: #ffcc00;
             color: #fff;
             border: none;
-            border-radius: 20px;
-            padding: 6px 12px;
-            margin: 3px;
+            border-radius: 18px;
+            padding: 5px 10px;
+            margin: 2px;
             cursor: pointer;
-            font-size: 0.8em;
+            font-size: 0.7em;
+            min-width: 80px;
+            height: 30px;
+            line-height: 20px;
         }
 
         .toggle-ingredients-btn:hover, .toggle-ingredients-btn:active {
             background: #ffd633;
-            transform: translateY(-2px);
+            transform: translateY(-1px);
         }
 
         #recap-screen {
@@ -313,35 +325,36 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: linear-gradient(135deg, #fff, #ffd1dc);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
             z-index: 1000;
-            width: 90%;
-            max-width: 320px;
+            width: 85%;
+            max-width: 300px;
             text-align: center;
             display: none;
-            font-size: 0.9em;
+            font-size: 0.85em;
         }
 
         #recap-screen ul {
             list-style: none;
-            margin: 15px 0;
+            margin: 10px 0;
             text-align: left;
         }
 
         #recap-screen li {
-            padding: 4px 0;
-            font-size: 0.9em;
+            padding: 3px 0;
+            font-size: 0.85em;
         }
 
         @media (max-width: 600px) {
-            h1 { font-size: 1.5em; }
-            .status-item { flex: 1 1 100%; font-size: 0.85em; }
-            .game-container { padding: 5px; }
-            button { padding: 6px 12px; font-size: 0.8em; }
-            .ingredient-button { padding: 5px 10px; font-size: 0.75em; }
-            .ticket { font-size: 0.8em; }
+            h1 { font-size: 1.4em; }
+            .status-item { flex: 1 1 100%; font-size: 0.75em; }
+            .game-container { padding: 3px; }
+            button { padding: 5px 10px; font-size: 0.7em; }
+            .ingredient-button { padding: 4px 8px; font-size: 0.65em; min-width: 50px; height: 28px; line-height: 20px; }
+            .ticket { font-size: 0.7em; }
+            .toggle-ingredients-btn { min-width: 70px; }
         }
     </style>
 </head>
@@ -505,6 +518,15 @@
             renderUpgrades();
         });
 
+        document.getElementById('enter-btn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            document.getElementById('welcome-screen').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+            showPopup('instructions');
+            startLevel();
+            renderUpgrades();
+        });
+
         function showPopup(id) {
             const popup = document.getElementById(id);
             popup.classList.add('show');
@@ -562,7 +584,7 @@
                 if (gameState.levelTimeRemaining <= 0 && gameState.drinksMade < gameState.drinksPerLevel) {
                     clearInterval(gameState.timerInterval);
                     showNotification("Time's up! Level restarting...");
-                    setTimeout(startLevel, 2000); // Restart current level if time runs out before 10 drinks
+                    setTimeout(startLevel, 2000);
                 }
             }, 1000);
         }
@@ -597,14 +619,22 @@
                     <div id="required-${index}" style="display: ${order.showIngredients ? 'block' : 'none'}">
                         <p><strong>Required:</strong> ${drinkRecipes[gameState.currentLevel][order.drink].join(', ')}</p>
                     </div>
-                    <div id="ingredients-${index}"></div>
+                    <div id="ingredients-${index}" style="overflow-x: auto; white-space: nowrap;"></div>
                     <button data-index="${index}" class="serve-btn">Serve</button>
                 `;
                 ordersDiv.appendChild(ticket);
                 generateIngredients(index);
 
                 ticket.querySelector('.toggle-ingredients-btn').addEventListener('click', () => toggleIngredients(index));
+                ticket.querySelector('.toggle-ingredients-btn').addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    toggleIngredients(index);
+                });
                 ticket.querySelector('.serve-btn').addEventListener('click', () => serveDrink(index));
+                ticket.querySelector('.serve-btn').addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    serveDrink(index);
+                });
             });
         }
 
@@ -628,7 +658,10 @@
                 if (gameState.currentOrders[orderIndex].selectedIngredients.includes(ing)) btn.classList.add('selected');
                 if (gameState.highlightingEnabled && gameState.ordersServedThisLevel < 3 && requiredIngredients.includes(ing)) btn.classList.add('required');
                 if (!["Glass"].includes(ing) && gameState.ingredientStock[ing] <= 0) btn.disabled = true;
-                btn.addEventListener('click', () => selectIngredient(ing, orderIndex));
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault(); // Prevent default click behavior
+                    selectIngredient(ing, orderIndex);
+                });
                 btn.addEventListener('touchstart', (e) => {
                     e.preventDefault();
                     selectIngredient(ing, orderIndex);
@@ -736,9 +769,14 @@
                     <td>${ing}</td>
                     <td>${stock}</td>
                     <td>$${cost}</td>
-                    <td><button onclick="restockIngredient('${ing}', ${cost})">Restock</button></td>
+                    <td><button class="restock-btn" data-ing="${ing}" data-cost="${cost}">Restock</button></td>
                 `;
                 tbody.appendChild(row);
+                row.querySelector('.restock-btn').addEventListener('click', () => restockIngredient(ing, cost));
+                row.querySelector('.restock-btn').addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    restockIngredient(ing, cost);
+                });
             }
             showPopup('restock-modal');
         }
@@ -782,6 +820,10 @@
                     const btn = document.createElement('button');
                     btn.textContent = `${upgrade.name} ($${upgrade.cost})`;
                     btn.addEventListener('click', () => buyUpgrade(index));
+                    btn.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        buyUpgrade(index);
+                    });
                     container.appendChild(btn);
                 }
             });
